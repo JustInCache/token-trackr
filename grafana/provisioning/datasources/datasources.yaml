@@ -1,0 +1,36 @@
+# Grafana Datasources Configuration
+# ==================================
+
+apiVersion: 1
+
+datasources:
+  # PostgreSQL for token usage data
+  - name: TokenTrackr PostgreSQL
+    type: postgres
+    uid: token-trackr-pg
+    url: postgres:5432
+    database: token_trackr
+    user: postgres
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      postgresVersion: 1600
+      timescaledb: false
+    editable: false
+
+  # Prometheus for application metrics
+  - name: TokenTrackr Prometheus
+    type: prometheus
+    uid: token-trackr-prom
+    url: http://prometheus:9090
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: "2.47.0"
+    editable: false
+

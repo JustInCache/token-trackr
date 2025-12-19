@@ -1,0 +1,17 @@
+# Grafana Dashboard Provisioning
+# ===============================
+
+apiVersion: 1
+
+providers:
+  - name: Token Trackr Dashboards
+    orgId: 1
+    folder: Token Trackr
+    folderUid: token-trackr
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+

@@ -1,0 +1,281 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT COUNT(*) as requests FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp)",
+        "refId": "A"
+      }],
+      "title": "Total Requests",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT SUM(prompt_tokens) as prompt_tokens FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp)",
+        "refId": "A"
+      }],
+      "title": "Prompt Tokens",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT SUM(completion_tokens) as completion_tokens FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp)",
+        "refId": "A"
+      }],
+      "title": "Completion Tokens",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT SUM(calculated_cost)::numeric(20,4) as cost FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp)",
+        "refId": "A"
+      }],
+      "title": "Total Cost",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 5,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT AVG(latency_ms)::int as avg_latency FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp) AND latency_ms IS NOT NULL",
+        "refId": "A"
+      }],
+      "title": "Avg Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 6,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT COUNT(DISTINCT model) as models_used FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp)",
+        "refId": "A"
+      }],
+      "title": "Models Used",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": true, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 7,
+      "options": { "legend": { "calcs": ["sum", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "time_series",
+        "rawQuery": true,
+        "rawSql": "SELECT date_trunc('hour', timestamp) as time, model, SUM(total_tokens) as tokens FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp) GROUP BY 1, 2 ORDER BY 1",
+        "refId": "A"
+      }],
+      "title": "Tokens by Model",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": true, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 8,
+      "options": { "legend": { "calcs": ["sum", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "time_series",
+        "rawQuery": true,
+        "rawSql": "SELECT date_trunc('hour', timestamp) as time, model, SUM(calculated_cost)::numeric(20,4) as cost FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp) GROUP BY 1, 2 ORDER BY 1",
+        "refId": "A"
+      }],
+      "title": "Cost by Model",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "cost" }, "properties": [{ "id": "unit", "value": "currencyUSD" }] },
+          { "matcher": { "id": "byName", "options": "avg_latency" }, "properties": [{ "id": "unit", "value": "ms" }] }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "id": 9,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": true }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "cost" }] },
+      "pluginVersion": "10.2.2",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+        "editorMode": "code",
+        "format": "table",
+        "rawQuery": true,
+        "rawSql": "SELECT provider, model, COUNT(*) as requests, SUM(prompt_tokens) as prompt_tokens, SUM(completion_tokens) as completion_tokens, SUM(total_tokens) as total_tokens, SUM(calculated_cost)::numeric(20,4) as cost, AVG(latency_ms)::int as avg_latency FROM token_usage_raw WHERE tenant_id = '$tenant' AND $__timeFilter(timestamp) GROUP BY provider, model ORDER BY cost DESC",
+        "refId": "A"
+      }],
+      "title": "Usage by Model",
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["token-trackr", "tenant"],
+  "templating": {
+    "list": [{
+      "current": {},
+      "datasource": { "type": "postgres", "uid": "token-trackr-pg" },
+      "definition": "SELECT DISTINCT tenant_id FROM token_usage_raw ORDER BY tenant_id",
+      "hide": 0,
+      "includeAll": false,
+      "label": "Tenant",
+      "multi": false,
+      "name": "tenant",
+      "options": [],
+      "query": "SELECT DISTINCT tenant_id FROM token_usage_raw ORDER BY tenant_id",
+      "refresh": 2,
+      "regex": "",
+      "skipUrlSync": false,
+      "sort": 1,
+      "type": "query"
+    }]
+  },
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Tenant Details",
+  "uid": "tenant-details",
+  "version": 1,
+  "weekStart": ""
+}
+
