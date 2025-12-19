@@ -1,0 +1,35 @@
+# Prometheus Configuration for Token Trackr
+# ============================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    monitor: 'token-trackr'
+
+alerting:
+  alertmanagers: []
+
+rule_files: []
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Token Trackr Backend API
+  - job_name: 'token-trackr-api'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Token Trackr Worker
+  - job_name: 'token-trackr-worker'
+    static_configs:
+      - targets: ['worker:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
