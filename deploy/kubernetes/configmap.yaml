@@ -1,0 +1,88 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: token-trackr-config
+  namespace: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: backend
+data:
+  APP_ENV: "production"
+  APP_HOST: "0.0.0.0"
+  APP_PORT: "8000"
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+  METRICS_ENABLED: "true"
+  METRICS_PORT: "9090"
+  SCHEDULER_ENABLED: "false"
+  DAILY_AGGREGATION_HOUR: "2"
+  MONTHLY_AGGREGATION_DAY: "1"
+  PRICING_CONFIG_PATH: "/app/config/pricing.yaml"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: token-trackr-worker-config
+  namespace: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: worker
+data:
+  APP_ENV: "production"
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+  SCHEDULER_ENABLED: "true"
+  DAILY_AGGREGATION_HOUR: "2"
+  MONTHLY_AGGREGATION_DAY: "1"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: token-trackr-pricing
+  namespace: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: config
+data:
+  pricing.yaml: |
+    version: "1.0"
+    updated_at: "2024-12-01"
+    
+    bedrock:
+      anthropic.claude-3-5-sonnet-20241022-v2:0:
+        input_per_1k: 0.003
+        output_per_1k: 0.015
+      anthropic.claude-3-haiku-20240307-v1:0:
+        input_per_1k: 0.00025
+        output_per_1k: 0.00125
+    
+    azure_openai:
+      gpt-4o:
+        input_per_1k: 0.005
+        output_per_1k: 0.015
+      gpt-4o-mini:
+        input_per_1k: 0.00015
+        output_per_1k: 0.0006
+    
+    gemini:
+      gemini-1.5-pro:
+        input_per_1k: 0.00125
+        output_per_1k: 0.005
+      gemini-1.5-flash:
+        input_per_1k: 0.000075
+        output_per_1k: 0.0003
+    
+    defaults:
+      bedrock:
+        input_per_1k: 0.002
+        output_per_1k: 0.006
+      azure_openai:
+        input_per_1k: 0.002
+        output_per_1k: 0.006
+      gemini:
+        input_per_1k: 0.001
+        output_per_1k: 0.003
+

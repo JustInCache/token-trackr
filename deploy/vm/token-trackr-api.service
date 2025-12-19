@@ -1,0 +1,64 @@
+[Unit]
+Description=Token Trackr API Service
+Documentation=https://github.com/your-org/token-trackr
+After=network.target postgresql.service redis.service
+Wants=postgresql.service
+
+[Service]
+Type=exec
+User=tokentrackr
+Group=tokentrackr
+WorkingDirectory=/opt/token-trackr
+
+# Environment
+EnvironmentFile=/etc/token-trackr/token-trackr.env
+
+# Start command
+ExecStart=/opt/token-trackr/venv/bin/uvicorn backend.main:app \
+    --host ${APP_HOST:-0.0.0.0} \
+    --port ${APP_PORT:-8000} \
+    --workers 4 \
+    --loop uvloop \
+    --http httptools \
+    --log-level ${LOG_LEVEL:-info}
+
+# Reload signal
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart configuration
+Restart=always
+RestartSec=5
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=token-trackr-api
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+MemoryDenyWriteExecute=true
+LockPersonality=true
+
+# Allowed paths
+ReadWritePaths=/var/log/token-trackr /opt/token-trackr/reports
+
+[Install]
+WantedBy=multi-user.target
+

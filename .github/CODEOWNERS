@@ -1,0 +1,40 @@
+# Code Owners Configuration
+# ==========================
+# These owners will be automatically requested for review
+# when someone opens a pull request that modifies code that they own.
+
+# Default owners for everything in the repo
+* @your-org/token-analyzer-team
+
+# Backend code
+/backend/ @your-org/backend-team
+
+# Python SDK
+/sdk/python/ @your-org/sdk-team
+
+# Node.js SDK
+/sdk/nodejs/ @your-org/sdk-team
+
+# Kubernetes deployments
+/deploy/kubernetes/ @your-org/platform-team @your-org/sre-team
+
+# VM deployments
+/deploy/vm/ @your-org/platform-team
+
+# CI/CD pipelines
+/.github/ @your-org/platform-team
+
+# Database migrations
+/alembic/ @your-org/backend-team @your-org/dba-team
+/database/ @your-org/backend-team @your-org/dba-team
+
+# Configuration
+/config/ @your-org/backend-team
+
+# Grafana dashboards
+/grafana/ @your-org/observability-team
+
+# Documentation
+*.md @your-org/docs-team
+/README.md @your-org/token-analyzer-team
+

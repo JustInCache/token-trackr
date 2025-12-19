@@ -1,0 +1,150 @@
+# Release Workflow
+# ================
+# Creates releases and publishes packages when tags are pushed
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # ============================================
+  # Create GitHub Release
+  # ============================================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last tag
+          PREV_TAG=$(git describe --abbrev=0 --tags HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD~10..HEAD)
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Token Trackr v${{ steps.version.outputs.version }}
+            
+            ### Changes
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### Docker Image
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+            ```
+            
+            ### Python SDK
+            ```bash
+            pip install token-trackr-sdk==${{ steps.version.outputs.version }}
+            ```
+            
+            ### Node.js SDK
+            ```bash
+            npm install token-trackr-sdk@${{ steps.version.outputs.version }}
+            ```
+          draft: false
+          prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+          generate_release_notes: true
+
+  # ============================================
+  # Build Release Artifacts
+  # ============================================
+  build-artifacts:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: [create-release]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Build Python SDK
+      - name: Build Python SDK
+        run: |
+          cd sdk/python
+          pip install build
+          python -m build
+
+      # Build Node.js SDK
+      - name: Build Node.js SDK
+        run: |
+          cd sdk/nodejs
+          npm ci
+          npm run build
+          npm pack
+
+      # Create deployment package
+      - name: Create deployment package
+        run: |
+          mkdir -p release-artifacts
+          
+          # Copy Kubernetes manifests
+          cp -r deploy/kubernetes release-artifacts/
+          
+          # Copy VM deployment files
+          cp -r deploy/vm release-artifacts/
+          
+          # Copy config examples
+          cp config/pricing.yaml release-artifacts/
+          cp env.example release-artifacts/
+          
+          # Create tarball
+          tar -czvf token-trackr-deploy-${{ needs.create-release.outputs.version }}.tar.gz release-artifacts/
+
+      - name: Upload Python SDK to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: sdk/python/dist/*
+
+      - name: Upload Node.js SDK to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: sdk/nodejs/*.tgz
+
+      - name: Upload deployment package to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: token-trackr-deploy-*.tar.gz
+

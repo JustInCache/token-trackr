@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: infrastructure
+

@@ -1,0 +1,170 @@
+---
+# Daily aggregation job - runs at 2 AM UTC
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: token-trackr-daily-aggregation
+  namespace: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: job
+spec:
+  schedule: "0 2 * * *"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: token-trackr
+            app.kubernetes.io/component: job
+        spec:
+          serviceAccountName: token-trackr
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          containers:
+            - name: aggregation
+              image: token-trackr:latest
+              command:
+                - python
+                - -c
+                - |
+                  import asyncio
+                  from backend.jobs.aggregation import DailyAggregationJob
+                  asyncio.run(DailyAggregationJob().run())
+              envFrom:
+                - secretRef:
+                    name: token-trackr-secrets
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+
+---
+# Monthly aggregation job - runs on 1st of month at 3 AM UTC
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: token-trackr-monthly-aggregation
+  namespace: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: job
+spec:
+  schedule: "0 3 1 * *"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 7200
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: token-trackr
+            app.kubernetes.io/component: job
+        spec:
+          serviceAccountName: token-trackr
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          containers:
+            - name: aggregation
+              image: token-trackr:latest
+              command:
+                - python
+                - -c
+                - |
+                  import asyncio
+                  from backend.jobs.aggregation import MonthlyAggregationJob
+                  asyncio.run(MonthlyAggregationJob().run())
+              envFrom:
+                - secretRef:
+                    name: token-trackr-secrets
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+
+---
+# Monthly billing reports - runs on 2nd of month at 4 AM UTC
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: token-trackr-billing-reports
+  namespace: token-trackr
+  labels:
+    app.kubernetes.io/name: token-trackr
+    app.kubernetes.io/component: job
+spec:
+  schedule: "0 4 2 * *"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: token-trackr
+            app.kubernetes.io/component: job
+        spec:
+          serviceAccountName: token-trackr
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          containers:
+            - name: reports
+              image: token-trackr:latest
+              command:
+                - python
+                - -c
+                - |
+                  import asyncio
+                  from datetime import date, timedelta
+                  from backend.jobs.reports import BillingReportJob
+                  
+                  today = date.today()
+                  if today.month == 1:
+                      year, month = today.year - 1, 12
+                  else:
+                      year, month = today.year, today.month - 1
+                  
+                  asyncio.run(BillingReportJob().generate_monthly_report(year, month))
+              envFrom:
+                - secretRef:
+                    name: token-trackr-secrets
+              volumeMounts:
+                - name: reports
+                  mountPath: /app/reports
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: reports
+              emptyDir: {}
+

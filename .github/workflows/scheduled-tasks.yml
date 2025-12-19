@@ -1,0 +1,104 @@
+# Scheduled Tasks
+# ===============
+# Regular maintenance and monitoring tasks
+
+name: Scheduled Tasks
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  # ============================================
+  # Update Dependencies
+  # ============================================
+  update-dependencies:
+    name: Check for Dependency Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check for outdated Python packages
+        run: |
+          pip install pip-outdated
+          pip install -e ".[dev]"
+          pip list --outdated --format=json > python-outdated.json || true
+          cat python-outdated.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check for outdated Node packages
+        working-directory: sdk/nodejs
+        run: |
+          npm ci
+          npm outdated --json > ../nodejs-outdated.json || true
+          cat ../nodejs-outdated.json
+
+  # ============================================
+  # Container Vulnerability Scan
+  # ============================================
+  container-scan:
+    name: Scan Container for Vulnerabilities
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: token-trackr:scan
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'token-trackr:scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+        continue-on-error: true
+
+  # ============================================
+  # Stale Issues/PRs Cleanup
+  # ============================================
+  stale:
+    name: Close Stale Issues and PRs
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: 'This issue has been automatically marked as stale due to inactivity. It will be closed in 7 days if no further activity occurs.'
+          stale-pr-message: 'This PR has been automatically marked as stale due to inactivity. It will be closed in 7 days if no further activity occurs.'
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          days-before-stale: 30
+          days-before-close: 7
+          exempt-issue-labels: 'pinned,security,bug'
+          exempt-pr-labels: 'pinned,security'
+

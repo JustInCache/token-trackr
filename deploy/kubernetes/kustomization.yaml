@@ -1,0 +1,29 @@
+# Kustomize configuration for Token Trackr
+# ==========================================
+# Apply with: kubectl apply -k deploy/kubernetes/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: token-trackr
+
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - configmap.yaml
+  - secret.yaml
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - cronjob.yaml
+  - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/version: "1.0.0"
+
+images:
+  - name: token-trackr
+    newName: your-registry/token-trackr
+    newTag: latest
+
