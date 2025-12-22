@@ -1,6 +1,7 @@
 # Dependency Review
 # =================
 # Scans PRs for vulnerable dependencies
+# Note: Requires GitHub Advanced Security (free for public repos, paid for private)
 
 name: Dependency Review
 
@@ -16,6 +17,8 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
+    # Only run on public repos (GHAS is free for public, paid for private)
+    if: github.event.repository.visibility == 'public'
     
     steps:
       - name: Checkout repository
@@ -27,4 +30,15 @@ jobs:
           fail-on-severity: high
           deny-licenses: GPL-3.0, AGPL-3.0
           comment-summary-in-pr: always
+
+  # Fallback job for private repos without GHAS
+  skip-notice:
+    name: Dependency Review (Skipped)
+    runs-on: ubuntu-latest
+    if: github.event.repository.visibility != 'public'
+    steps:
+      - name: Notice
+        run: |
+          echo "::notice::Dependency Review skipped - requires GitHub Advanced Security (available for public repos or with GHAS license)"
+          echo "To enable: Go to Settings > Security > Code security and analysis > Enable Dependency graph and GitHub Advanced Security"
 
