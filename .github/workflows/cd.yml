@@ -21,6 +21,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # Note: github.repository is automatically lowercased by ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -87,8 +88,9 @@ jobs:
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
           artifact-name: sbom.spdx.json
+        continue-on-error: true
 
   # ============================================
   # Build Python SDK Package
