@@ -78,9 +78,7 @@ class BedrockWrapper:
         response_body = json.loads(response["body"].read())
 
         # Extract token counts based on model family
-        prompt_tokens, completion_tokens = self._extract_tokens(
-            modelId, response_body, response
-        )
+        prompt_tokens, completion_tokens = self._extract_tokens(modelId, response_body, response)
 
         # Record usage
         self._client.record(
@@ -234,4 +232,3 @@ class _StreamingResponseWrapper:
                 latency_ms=latency_ms,
             )
             raise
-

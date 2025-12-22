@@ -108,8 +108,7 @@ class TenantDailySummary(Base, TimestampMixin):
 
     __table_args__ = (
         UniqueConstraint(
-            "tenant_id", "date", "provider", "model", "cloud_provider",
-            name="uq_daily_summary"
+            "tenant_id", "date", "provider", "model", "cloud_provider", name="uq_daily_summary"
         ),
         Index("idx_daily_tenant_date", "tenant_id", "date"),
     )
@@ -147,8 +146,7 @@ class TenantMonthlySummary(Base, TimestampMixin):
 
     __table_args__ = (
         UniqueConstraint(
-            "tenant_id", "year", "month", "provider", "model",
-            name="uq_monthly_summary"
+            "tenant_id", "year", "month", "provider", "model", name="uq_monthly_summary"
         ),
         Index("idx_monthly_tenant_period", "tenant_id", "year", "month"),
     )
@@ -182,10 +180,6 @@ class PricingTable(Base, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     __table_args__ = (
-        UniqueConstraint(
-            "provider", "model", "effective_from",
-            name="uq_pricing_model_date"
-        ),
+        UniqueConstraint("provider", "model", "effective_from", name="uq_pricing_model_date"),
         Index("idx_pricing_lookup", "provider", "model", "is_active"),
     )
-

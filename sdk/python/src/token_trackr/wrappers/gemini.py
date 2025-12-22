@@ -274,4 +274,3 @@ class _ChatSessionWrapper:
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._chat, name)
-

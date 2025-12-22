@@ -99,6 +99,7 @@ class TokenTrackrClient:
 
     def _start_background_flush(self) -> None:
         """Start background thread for periodic flushing."""
+
         def flush_worker():
             while not self._stop_event.is_set():
                 time.sleep(self.config.flush_interval)
@@ -269,4 +270,3 @@ def record(
         completion_tokens=completion_tokens,
         **kwargs,
     )
-

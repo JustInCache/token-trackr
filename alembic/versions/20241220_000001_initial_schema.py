@@ -5,6 +5,7 @@ Revises:
 Create Date: 2024-12-20 00:00:01
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -40,8 +41,12 @@ def upgrade() -> None:
         sa.Column("k8s_namespace", sa.String(255), nullable=True),
         sa.Column("k8s_node", sa.String(255), nullable=True),
         sa.Column("metadata_json", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
 
@@ -52,7 +57,9 @@ def upgrade() -> None:
     op.create_index("idx_usage_timestamp", "token_usage_raw", ["timestamp"])
     op.create_index("idx_usage_tenant_timestamp", "token_usage_raw", ["tenant_id", "timestamp"])
     op.create_index("idx_usage_provider_model", "token_usage_raw", ["provider", "model"])
-    op.create_index("idx_usage_cloud_instance", "token_usage_raw", ["cloud_provider", "instance_id"])
+    op.create_index(
+        "idx_usage_cloud_instance", "token_usage_raw", ["cloud_provider", "instance_id"]
+    )
     op.create_index("idx_usage_k8s", "token_usage_raw", ["k8s_namespace", "k8s_pod"])
 
     # Create tenant_daily_summary table
@@ -70,12 +77,15 @@ def upgrade() -> None:
         sa.Column("total_tokens", sa.BigInteger(), nullable=False, server_default="0"),
         sa.Column("total_cost", sa.Numeric(20, 10), nullable=False, server_default="0"),
         sa.Column("avg_latency_ms", sa.BigInteger(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
-            "tenant_id", "date", "provider", "model", "cloud_provider",
-            name="uq_daily_summary"
+            "tenant_id", "date", "provider", "model", "cloud_provider", name="uq_daily_summary"
         ),
     )
 
@@ -96,17 +106,22 @@ def upgrade() -> None:
         sa.Column("total_completion_tokens", sa.BigInteger(), nullable=False, server_default="0"),
         sa.Column("total_tokens", sa.BigInteger(), nullable=False, server_default="0"),
         sa.Column("total_cost", sa.Numeric(20, 10), nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
-            "tenant_id", "year", "month", "provider", "model",
-            name="uq_monthly_summary"
+            "tenant_id", "year", "month", "provider", "model", name="uq_monthly_summary"
         ),
     )
 
     # Create indexes for tenant_monthly_summary
-    op.create_index("idx_monthly_tenant_period", "tenant_monthly_summary", ["tenant_id", "year", "month"])
+    op.create_index(
+        "idx_monthly_tenant_period", "tenant_monthly_summary", ["tenant_id", "year", "month"]
+    )
 
     # Create pricing_table
     op.create_table(
@@ -119,13 +134,14 @@ def upgrade() -> None:
         sa.Column("effective_from", sa.Date(), nullable=False),
         sa.Column("effective_to", sa.Date(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "provider", "model", "effective_from",
-            name="uq_pricing_model_date"
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
         ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("provider", "model", "effective_from", name="uq_pricing_model_date"),
     )
 
     # Create indexes for pricing_table
@@ -137,4 +153,3 @@ def downgrade() -> None:
     op.drop_table("tenant_monthly_summary")
     op.drop_table("tenant_daily_summary")
     op.drop_table("token_usage_raw")
-

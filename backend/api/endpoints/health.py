@@ -57,4 +57,3 @@ async def readiness_check(
         database=db_status,
         version="1.0.0",
     )
-

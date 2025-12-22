@@ -24,4 +24,3 @@ __all__ = [
     "GeminiWrapper",
     "get_host_metadata",
 ]
-

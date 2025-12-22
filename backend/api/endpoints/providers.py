@@ -81,4 +81,3 @@ async def reload_pricing() -> dict[str, str]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to reload pricing configuration",
         ) from e
-

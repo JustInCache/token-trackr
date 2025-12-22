@@ -190,11 +190,13 @@ class PricingEngine:
         models = []
         for model, pricing in provider_pricing.items():
             if isinstance(pricing, dict) and "input_per_1k" in pricing:
-                models.append({
-                    "model": model,
-                    "input_price_per_1k": Decimal(str(pricing["input_per_1k"])),
-                    "output_price_per_1k": Decimal(str(pricing["output_per_1k"])),
-                })
+                models.append(
+                    {
+                        "model": model,
+                        "input_price_per_1k": Decimal(str(pricing["input_per_1k"])),
+                        "output_price_per_1k": Decimal(str(pricing["output_per_1k"])),
+                    }
+                )
 
         return sorted(models, key=lambda x: x["model"])
 
@@ -203,4 +205,3 @@ class PricingEngine:
 def get_pricing_engine() -> PricingEngine:
     """Get cached pricing engine instance."""
     return PricingEngine()
-

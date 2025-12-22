@@ -15,4 +15,3 @@ api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(usage.router, prefix="/usage", tags=["Usage"])
 api_router.include_router(tenants.router, prefix="/tenant", tags=["Tenants"])
 api_router.include_router(providers.router, prefix="/provider", tags=["Providers"])
-

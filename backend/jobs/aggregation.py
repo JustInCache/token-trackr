@@ -45,24 +45,26 @@ class DailyAggregationJob:
 
         async with get_session_context() as session:
             # Get aggregated data from raw events
-            stmt = select(
-                TokenUsageRaw.tenant_id,
-                TokenUsageRaw.provider,
-                TokenUsageRaw.model,
-                TokenUsageRaw.cloud_provider,
-                func.count(TokenUsageRaw.id).label("total_requests"),
-                func.sum(TokenUsageRaw.prompt_tokens).label("total_prompt_tokens"),
-                func.sum(TokenUsageRaw.completion_tokens).label("total_completion_tokens"),
-                func.sum(TokenUsageRaw.total_tokens).label("total_tokens"),
-                func.sum(TokenUsageRaw.calculated_cost).label("total_cost"),
-                func.avg(TokenUsageRaw.latency_ms).label("avg_latency_ms"),
-            ).where(
-                func.date(TokenUsageRaw.timestamp) == target_date
-            ).group_by(
-                TokenUsageRaw.tenant_id,
-                TokenUsageRaw.provider,
-                TokenUsageRaw.model,
-                TokenUsageRaw.cloud_provider,
+            stmt = (
+                select(
+                    TokenUsageRaw.tenant_id,
+                    TokenUsageRaw.provider,
+                    TokenUsageRaw.model,
+                    TokenUsageRaw.cloud_provider,
+                    func.count(TokenUsageRaw.id).label("total_requests"),
+                    func.sum(TokenUsageRaw.prompt_tokens).label("total_prompt_tokens"),
+                    func.sum(TokenUsageRaw.completion_tokens).label("total_completion_tokens"),
+                    func.sum(TokenUsageRaw.total_tokens).label("total_tokens"),
+                    func.sum(TokenUsageRaw.calculated_cost).label("total_cost"),
+                    func.avg(TokenUsageRaw.latency_ms).label("avg_latency_ms"),
+                )
+                .where(func.date(TokenUsageRaw.timestamp) == target_date)
+                .group_by(
+                    TokenUsageRaw.tenant_id,
+                    TokenUsageRaw.provider,
+                    TokenUsageRaw.model,
+                    TokenUsageRaw.cloud_provider,
+                )
             )
 
             result = await session.execute(stmt)
@@ -75,28 +77,34 @@ class DailyAggregationJob:
             # Upsert daily summaries
             count = 0
             for row in rows:
-                upsert_stmt = pg_insert(TenantDailySummary).values(
-                    tenant_id=row.tenant_id,
-                    date=target_date,
-                    provider=row.provider,
-                    model=row.model,
-                    cloud_provider=row.cloud_provider,
-                    total_requests=row.total_requests,
-                    total_prompt_tokens=row.total_prompt_tokens or 0,
-                    total_completion_tokens=row.total_completion_tokens or 0,
-                    total_tokens=row.total_tokens or 0,
-                    total_cost=row.total_cost or Decimal("0"),
-                    avg_latency_ms=int(row.avg_latency_ms) if row.avg_latency_ms else None,
-                ).on_conflict_do_update(
-                    constraint="uq_daily_summary",
-                    set_={
-                        "total_requests": row.total_requests,
-                        "total_prompt_tokens": row.total_prompt_tokens or 0,
-                        "total_completion_tokens": row.total_completion_tokens or 0,
-                        "total_tokens": row.total_tokens or 0,
-                        "total_cost": row.total_cost or Decimal("0"),
-                        "avg_latency_ms": int(row.avg_latency_ms) if row.avg_latency_ms else None,
-                    },
+                upsert_stmt = (
+                    pg_insert(TenantDailySummary)
+                    .values(
+                        tenant_id=row.tenant_id,
+                        date=target_date,
+                        provider=row.provider,
+                        model=row.model,
+                        cloud_provider=row.cloud_provider,
+                        total_requests=row.total_requests,
+                        total_prompt_tokens=row.total_prompt_tokens or 0,
+                        total_completion_tokens=row.total_completion_tokens or 0,
+                        total_tokens=row.total_tokens or 0,
+                        total_cost=row.total_cost or Decimal("0"),
+                        avg_latency_ms=int(row.avg_latency_ms) if row.avg_latency_ms else None,
+                    )
+                    .on_conflict_do_update(
+                        constraint="uq_daily_summary",
+                        set_={
+                            "total_requests": row.total_requests,
+                            "total_prompt_tokens": row.total_prompt_tokens or 0,
+                            "total_completion_tokens": row.total_completion_tokens or 0,
+                            "total_tokens": row.total_tokens or 0,
+                            "total_cost": row.total_cost or Decimal("0"),
+                            "avg_latency_ms": (
+                                int(row.avg_latency_ms) if row.avg_latency_ms else None
+                            ),
+                        },
+                    )
                 )
                 await session.execute(upsert_stmt)
                 count += 1
@@ -162,22 +170,28 @@ class MonthlyAggregationJob:
                 last_day = date(year, month + 1, 1) - timedelta(days=1)
 
             # Aggregate from daily summaries
-            stmt = select(
-                TenantDailySummary.tenant_id,
-                TenantDailySummary.provider,
-                TenantDailySummary.model,
-                func.sum(TenantDailySummary.total_requests).label("total_requests"),
-                func.sum(TenantDailySummary.total_prompt_tokens).label("total_prompt_tokens"),
-                func.sum(TenantDailySummary.total_completion_tokens).label("total_completion_tokens"),
-                func.sum(TenantDailySummary.total_tokens).label("total_tokens"),
-                func.sum(TenantDailySummary.total_cost).label("total_cost"),
-            ).where(
-                TenantDailySummary.date >= first_day,
-                TenantDailySummary.date <= last_day,
-            ).group_by(
-                TenantDailySummary.tenant_id,
-                TenantDailySummary.provider,
-                TenantDailySummary.model,
+            stmt = (
+                select(
+                    TenantDailySummary.tenant_id,
+                    TenantDailySummary.provider,
+                    TenantDailySummary.model,
+                    func.sum(TenantDailySummary.total_requests).label("total_requests"),
+                    func.sum(TenantDailySummary.total_prompt_tokens).label("total_prompt_tokens"),
+                    func.sum(TenantDailySummary.total_completion_tokens).label(
+                        "total_completion_tokens"
+                    ),
+                    func.sum(TenantDailySummary.total_tokens).label("total_tokens"),
+                    func.sum(TenantDailySummary.total_cost).label("total_cost"),
+                )
+                .where(
+                    TenantDailySummary.date >= first_day,
+                    TenantDailySummary.date <= last_day,
+                )
+                .group_by(
+                    TenantDailySummary.tenant_id,
+                    TenantDailySummary.provider,
+                    TenantDailySummary.model,
+                )
             )
 
             result = await session.execute(stmt)
@@ -190,26 +204,30 @@ class MonthlyAggregationJob:
             # Upsert monthly summaries
             count = 0
             for row in rows:
-                upsert_stmt = pg_insert(TenantMonthlySummary).values(
-                    tenant_id=row.tenant_id,
-                    year=year,
-                    month=month,
-                    provider=row.provider,
-                    model=row.model,
-                    total_requests=row.total_requests or 0,
-                    total_prompt_tokens=row.total_prompt_tokens or 0,
-                    total_completion_tokens=row.total_completion_tokens or 0,
-                    total_tokens=row.total_tokens or 0,
-                    total_cost=row.total_cost or Decimal("0"),
-                ).on_conflict_do_update(
-                    constraint="uq_monthly_summary",
-                    set_={
-                        "total_requests": row.total_requests or 0,
-                        "total_prompt_tokens": row.total_prompt_tokens or 0,
-                        "total_completion_tokens": row.total_completion_tokens or 0,
-                        "total_tokens": row.total_tokens or 0,
-                        "total_cost": row.total_cost or Decimal("0"),
-                    },
+                upsert_stmt = (
+                    pg_insert(TenantMonthlySummary)
+                    .values(
+                        tenant_id=row.tenant_id,
+                        year=year,
+                        month=month,
+                        provider=row.provider,
+                        model=row.model,
+                        total_requests=row.total_requests or 0,
+                        total_prompt_tokens=row.total_prompt_tokens or 0,
+                        total_completion_tokens=row.total_completion_tokens or 0,
+                        total_tokens=row.total_tokens or 0,
+                        total_cost=row.total_cost or Decimal("0"),
+                    )
+                    .on_conflict_do_update(
+                        constraint="uq_monthly_summary",
+                        set_={
+                            "total_requests": row.total_requests or 0,
+                            "total_prompt_tokens": row.total_prompt_tokens or 0,
+                            "total_completion_tokens": row.total_completion_tokens or 0,
+                            "total_tokens": row.total_tokens or 0,
+                            "total_cost": row.total_cost or Decimal("0"),
+                        },
+                    )
                 )
                 await session.execute(upsert_stmt)
                 count += 1
@@ -217,4 +235,3 @@ class MonthlyAggregationJob:
             await session.commit()
             logger.info("Monthly aggregation completed", year=year, month=month, records=count)
             return count
-

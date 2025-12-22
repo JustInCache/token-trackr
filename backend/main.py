@@ -26,8 +26,11 @@ structlog.configure(
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
-        structlog.processors.JSONRenderer() if settings.log_format == "json"
-        else structlog.dev.ConsoleRenderer(),
+        (
+            structlog.processors.JSONRenderer()
+            if settings.log_format == "json"
+            else structlog.dev.ConsoleRenderer()
+        ),
     ],
     wrapper_class=structlog.stdlib.BoundLogger,
     context_class=dict,
@@ -97,4 +100,3 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
-

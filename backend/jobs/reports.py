@@ -82,33 +82,37 @@ class BillingReportJob:
                 writer = csv.writer(f)
 
                 # Header
-                writer.writerow([
-                    "Tenant ID",
-                    "Year",
-                    "Month",
-                    "Provider",
-                    "Model",
-                    "Total Requests",
-                    "Prompt Tokens",
-                    "Completion Tokens",
-                    "Total Tokens",
-                    "Total Cost (USD)",
-                ])
+                writer.writerow(
+                    [
+                        "Tenant ID",
+                        "Year",
+                        "Month",
+                        "Provider",
+                        "Model",
+                        "Total Requests",
+                        "Prompt Tokens",
+                        "Completion Tokens",
+                        "Total Tokens",
+                        "Total Cost (USD)",
+                    ]
+                )
 
                 # Data rows
                 for row in rows:
-                    writer.writerow([
-                        row.tenant_id,
-                        row.year,
-                        row.month,
-                        row.provider,
-                        row.model,
-                        row.total_requests,
-                        row.total_prompt_tokens,
-                        row.total_completion_tokens,
-                        row.total_tokens,
-                        f"{row.total_cost:.10f}",
-                    ])
+                    writer.writerow(
+                        [
+                            row.tenant_id,
+                            row.year,
+                            row.month,
+                            row.provider,
+                            row.model,
+                            row.total_requests,
+                            row.total_prompt_tokens,
+                            row.total_completion_tokens,
+                            row.total_tokens,
+                            f"{row.total_cost:.10f}",
+                        ]
+                    )
 
                 # Summary row if multiple tenants
                 if not tenant_id and rows:
@@ -117,18 +121,20 @@ class BillingReportJob:
                     total_cost = sum(r.total_cost for r in rows)
 
                     writer.writerow([])
-                    writer.writerow([
-                        "TOTAL",
-                        year,
-                        month,
-                        "-",
-                        "-",
-                        total_requests,
-                        "-",
-                        "-",
-                        total_tokens,
-                        f"{total_cost:.10f}",
-                    ])
+                    writer.writerow(
+                        [
+                            "TOTAL",
+                            year,
+                            month,
+                            "-",
+                            "-",
+                            total_requests,
+                            "-",
+                            "-",
+                            total_tokens,
+                            f"{total_cost:.10f}",
+                        ]
+                    )
 
             logger.info(
                 "Billing report generated",
@@ -161,14 +167,18 @@ class BillingReportJob:
 
             # Filter by date range
             stmt = stmt.where(
-                (TenantMonthlySummary.year > start_year) |
-                ((TenantMonthlySummary.year == start_year) &
-                 (TenantMonthlySummary.month >= start_month))
+                (TenantMonthlySummary.year > start_year)
+                | (
+                    (TenantMonthlySummary.year == start_year)
+                    & (TenantMonthlySummary.month >= start_month)
+                )
             )
             stmt = stmt.where(
-                (TenantMonthlySummary.year < end_year) |
-                ((TenantMonthlySummary.year == end_year) &
-                 (TenantMonthlySummary.month <= end_month))
+                (TenantMonthlySummary.year < end_year)
+                | (
+                    (TenantMonthlySummary.year == end_year)
+                    & (TenantMonthlySummary.month <= end_month)
+                )
             )
 
             stmt = stmt.order_by(
@@ -189,26 +199,30 @@ class BillingReportJob:
             with open(output_path, "w", newline="") as f:
                 writer = csv.writer(f)
 
-                writer.writerow([
-                    "Year",
-                    "Month",
-                    "Provider",
-                    "Model",
-                    "Requests",
-                    "Tokens",
-                    "Cost (USD)",
-                ])
+                writer.writerow(
+                    [
+                        "Year",
+                        "Month",
+                        "Provider",
+                        "Model",
+                        "Requests",
+                        "Tokens",
+                        "Cost (USD)",
+                    ]
+                )
 
                 for row in rows:
-                    writer.writerow([
-                        row.year,
-                        row.month,
-                        row.provider,
-                        row.model,
-                        row.total_requests,
-                        row.total_tokens,
-                        f"{row.total_cost:.10f}",
-                    ])
+                    writer.writerow(
+                        [
+                            row.year,
+                            row.month,
+                            row.provider,
+                            row.model,
+                            row.total_requests,
+                            row.total_tokens,
+                            f"{row.total_cost:.10f}",
+                        ]
+                    )
 
             logger.info(
                 "Tenant summary report generated",
@@ -216,4 +230,3 @@ class BillingReportJob:
                 records=len(rows),
             )
             return output_path
-

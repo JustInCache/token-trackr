@@ -39,4 +39,3 @@ class UsageResponse(BaseModel):
     total_tokens: int
     calculated_cost: float
     timestamp: datetime
-

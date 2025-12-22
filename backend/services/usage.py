@@ -136,14 +136,16 @@ class UsageService:
         """Get usage breakdown by a specific dimension."""
         column = getattr(TokenUsageRaw, group_by)
 
-        stmt = select(
-            column,
-            func.count(TokenUsageRaw.id).label("requests"),
-            func.sum(TokenUsageRaw.total_tokens).label("tokens"),
-            func.sum(TokenUsageRaw.calculated_cost).label("cost"),
-        ).where(
-            TokenUsageRaw.tenant_id == tenant_id
-        ).group_by(column)
+        stmt = (
+            select(
+                column,
+                func.count(TokenUsageRaw.id).label("requests"),
+                func.sum(TokenUsageRaw.total_tokens).label("tokens"),
+                func.sum(TokenUsageRaw.calculated_cost).label("cost"),
+            )
+            .where(TokenUsageRaw.tenant_id == tenant_id)
+            .group_by(column)
+        )
 
         result = await self.session.execute(stmt)
 
@@ -171,11 +173,15 @@ class UsageService:
             start_date = end_date - timedelta(days=30)
 
         # Query pre-aggregated daily summary
-        stmt = select(TenantDailySummary).where(
-            TenantDailySummary.tenant_id == tenant_id,
-            TenantDailySummary.date >= start_date,
-            TenantDailySummary.date <= end_date,
-        ).order_by(TenantDailySummary.date.desc())
+        stmt = (
+            select(TenantDailySummary)
+            .where(
+                TenantDailySummary.tenant_id == tenant_id,
+                TenantDailySummary.date >= start_date,
+                TenantDailySummary.date <= end_date,
+            )
+            .order_by(TenantDailySummary.date.desc())
+        )
 
         result = await self.session.execute(stmt)
         rows = result.scalars().all()
@@ -215,9 +221,7 @@ class UsageService:
         month: int | None = None,
     ) -> MonthlySummaryResponse:
         """Get monthly usage summary for a tenant."""
-        stmt = select(TenantMonthlySummary).where(
-            TenantMonthlySummary.tenant_id == tenant_id
-        )
+        stmt = select(TenantMonthlySummary).where(TenantMonthlySummary.tenant_id == tenant_id)
 
         if year:
             stmt = stmt.where(TenantMonthlySummary.year == year)
@@ -266,9 +270,7 @@ class UsageService:
         offset: int = 0,
     ) -> list[TokenUsageRaw]:
         """Get raw usage events for a tenant."""
-        stmt = select(TokenUsageRaw).where(
-            TokenUsageRaw.tenant_id == tenant_id
-        )
+        stmt = select(TokenUsageRaw).where(TokenUsageRaw.tenant_id == tenant_id)
 
         if start_time:
             stmt = stmt.where(TokenUsageRaw.timestamp >= start_time)
@@ -279,4 +281,3 @@ class UsageService:
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
-

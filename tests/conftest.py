@@ -122,4 +122,3 @@ def sample_batch_events() -> list[dict]:
             "timestamp": datetime.utcnow().isoformat(),
         },
     ]
-

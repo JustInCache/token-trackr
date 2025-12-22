@@ -162,4 +162,3 @@ def get_host_metadata() -> HostMetadata:
     # On-prem or unknown
     metadata.cloud_provider = "on-prem"
     return metadata
-

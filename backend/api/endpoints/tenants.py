@@ -106,4 +106,3 @@ async def get_monthly_summary(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve monthly summary",
         ) from e
-

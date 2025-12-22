@@ -29,12 +29,8 @@ class TokenTrackrConfig:
     backend_url: str = field(
         default_factory=lambda: os.getenv("TOKEN_TRACKR_URL", "http://localhost:8000")
     )
-    api_key: Optional[str] = field(
-        default_factory=lambda: os.getenv("TOKEN_TRACKR_API_KEY")
-    )
-    tenant_id: str = field(
-        default_factory=lambda: os.getenv("TOKEN_TRACKR_TENANT_ID", "default")
-    )
+    api_key: Optional[str] = field(default_factory=lambda: os.getenv("TOKEN_TRACKR_API_KEY"))
+    tenant_id: str = field(default_factory=lambda: os.getenv("TOKEN_TRACKR_TENANT_ID", "default"))
     batch_size: int = 10
     flush_interval: float = 5.0
     max_queue_size: int = 1000
@@ -51,4 +47,3 @@ class TokenTrackrConfig:
 
         # Ensure URL doesn't end with slash
         self.backend_url = self.backend_url.rstrip("/")
-

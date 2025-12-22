@@ -237,4 +237,3 @@ class _EmbeddingsWrapper:
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._embeddings, name)
-

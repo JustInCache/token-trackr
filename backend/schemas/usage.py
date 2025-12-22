@@ -146,4 +146,3 @@ class ProviderModelsResponse(BaseModel):
 
     provider: str
     models: list[ModelPricing]
-

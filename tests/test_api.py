@@ -31,7 +31,10 @@ class TestUsageEndpoints:
         assert data["tenant_id"] == sample_usage_event["tenant_id"]
         assert data["provider"] == sample_usage_event["provider"]
         assert data["model"] == sample_usage_event["model"]
-        assert data["total_tokens"] == sample_usage_event["prompt_tokens"] + sample_usage_event["completion_tokens"]
+        assert (
+            data["total_tokens"]
+            == sample_usage_event["prompt_tokens"] + sample_usage_event["completion_tokens"]
+        )
         assert "calculated_cost" in data
         assert "id" in data
 
@@ -124,4 +127,3 @@ class TestProviderEndpoints:
         """Test getting models for invalid provider."""
         response = client.get("/provider/invalid/models")
         assert response.status_code == 400
-

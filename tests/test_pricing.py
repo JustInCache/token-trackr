@@ -108,4 +108,3 @@ class TestPricingEngine:
             assert "model" in model
             assert "input_price_per_1k" in model
             assert "output_price_per_1k" in model
-

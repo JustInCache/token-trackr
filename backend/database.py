@@ -77,4 +77,3 @@ async def init_db() -> None:
 async def close_db() -> None:
     """Close database connection pool."""
     await engine.dispose()
-

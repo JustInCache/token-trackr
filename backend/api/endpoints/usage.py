@@ -109,4 +109,3 @@ async def record_usage_batch(
             continue
 
     return results
-
