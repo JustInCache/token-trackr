@@ -6,11 +6,11 @@ Alembic Environment Configuration
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from alembic import context
 from backend.config import settings
 from backend.models import Base
 
@@ -31,7 +31,7 @@ config.set_main_option("sqlalchemy.url", settings.database_url_sync)
 def run_migrations_offline() -> None:
     """
     Run migrations in 'offline' mode.
-    
+
     This configures the context with just a URL and not an Engine.
     Calls to context.execute() emit the given string to the script output.
     """
@@ -75,7 +75,7 @@ async def run_async_migrations() -> None:
 def run_migrations_online() -> None:
     """
     Run migrations in 'online' mode.
-    
+
     In this scenario we need to create an Engine and associate
     a connection with the context.
     """

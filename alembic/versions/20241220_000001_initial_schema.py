@@ -1,21 +1,22 @@
 """Initial schema
 
 Revision ID: 20241220_000001
-Revises: 
+Revises:
 Create Date: 2024-12-20 00:00:01
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = "20241220_000001"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -43,7 +44,7 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    
+
     # Create indexes for token_usage_raw
     op.create_index("idx_usage_tenant_id", "token_usage_raw", ["tenant_id"])
     op.create_index("idx_usage_provider", "token_usage_raw", ["provider"])
@@ -77,7 +78,7 @@ def upgrade() -> None:
             name="uq_daily_summary"
         ),
     )
-    
+
     # Create indexes for tenant_daily_summary
     op.create_index("idx_daily_tenant_date", "tenant_daily_summary", ["tenant_id", "date"])
 
@@ -103,7 +104,7 @@ def upgrade() -> None:
             name="uq_monthly_summary"
         ),
     )
-    
+
     # Create indexes for tenant_monthly_summary
     op.create_index("idx_monthly_tenant_period", "tenant_monthly_summary", ["tenant_id", "year", "month"])
 
@@ -126,7 +127,7 @@ def upgrade() -> None:
             name="uq_pricing_model_date"
         ),
     )
-    
+
     # Create indexes for pricing_table
     op.create_index("idx_pricing_lookup", "pricing_table", ["provider", "model", "is_active"])
 
