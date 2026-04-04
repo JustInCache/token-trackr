@@ -385,15 +385,21 @@ Jobs run automatically via:
 | Monthly Aggregation | 1st of month, 3:00 AM | Roll up daily to monthly summaries |
 | Billing Reports | 2nd of month, 4:00 AM | Generate CSV billing reports |
 
-## Support the Project
+## ☕ Support the Project
 
-If this repo saved you time or sparked an idea, consider buying me a coffee.
+If this repo saved you time or sparked an idea, consider buying me a coffee to keep the prompts flowing. ❤️ 
 
 <a href="https://buymeacoffee.com/connectankush">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="200">
+  <img src="img/bmc.png" alt="Buy Me a Coffee" width="150">
 </a>
 
 [https://buymeacoffee.com/connectankush](https://buymeacoffee.com/connectankush)
+
+Your support and feedback are valuable in maintaining and improving the extension.
+
+<a href="https://buymeacoffee.com/connectankush">
+  <img src="img/bmc-qr-code.png" alt="Buy Me a Coffee QR" width="150">
+</a>
 
 ## Contributing
 
@@ -401,6 +407,8 @@ If this repo saved you time or sparked an idea, consider buying me a coffee.
 2. Create a feature branch
 3. Make changes and add tests
 4. Submit a pull request
+
+## Contributing
 
 ## License
 
